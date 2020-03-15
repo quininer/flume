@@ -13,14 +13,21 @@
 //! assert_eq!(rx.recv().unwrap(), 42);
 //! ```
 
+#[cfg(feature = "loom")]
+use loom;
+
+#[cfg(not(feature = "loom"))]
+mod loom;
+
 use std::{
     collections::VecDeque,
-    sync::{Arc, atomic::{AtomicUsize, Ordering}},
     time::{Duration, Instant},
     cell::UnsafeCell,
-    thread,
+    marker::PhantomData
 };
-use std::sync::{Condvar, Mutex};
+use loom::thread;
+use loom::sync::{Condvar, Mutex};
+use loom::sync::{Arc, atomic::{AtomicUsize, Ordering}};
 
 /// An error that may be emitted when attempting to send a value into a channel on a sender.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -357,7 +364,7 @@ pub struct Receiver<T> {
     shared: Arc<Shared<T>>,
     /// Used to prevent Sync being implemented for this type - we never actually use it!
     /// TODO: impl<T> !Sync for Receiver<T> {} when negative traits are stable
-    _phantom_cell: UnsafeCell<()>,
+    _phantom_cell: PhantomData<UnsafeCell<()>>,
 }
 
 impl<T> Receiver<T> {
@@ -483,7 +490,7 @@ pub fn unbounded<T>() -> (Sender<T>, Receiver<T>) {
     });
     (
         Sender { shared: shared.clone() },
-        Receiver { shared, _phantom_cell: UnsafeCell::new(()) },
+        Receiver { shared, _phantom_cell: PhantomData },
     )
 }
 
@@ -521,6 +528,6 @@ pub fn bounded<T>(n: usize) -> (Sender<T>, Receiver<T>) {
     });
     (
         Sender { shared: shared.clone() },
-        Receiver { shared, _phantom_cell: UnsafeCell::new(()) },
+        Receiver { shared, _phantom_cell: PhantomData },
     )
 }

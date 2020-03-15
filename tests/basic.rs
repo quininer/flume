@@ -1,3 +1,5 @@
+#![cfg(not(feature = "loom"))]
+
 use std::time::{Instant, Duration};
 use flume::*;
 

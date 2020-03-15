@@ -12,6 +12,7 @@ readme = "README.md"
 
 [dependencies]
 spin = "0.5"
+loom = { version = "0.2", optional = true }
 
 [dev-dependencies]
 crossbeam-channel = "0.4"
