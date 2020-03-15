@@ -19,6 +19,8 @@ use loom;
 #[cfg(not(feature = "loom"))]
 mod loom;
 
+mod spin;
+
 use std::{
     collections::VecDeque,
     time::{Duration, Instant},
